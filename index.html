@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lat Long link generator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 py-4 px-6 shadow-xs">
+        <div class="max-w-md mx-auto flex items-center justify-between">
+            <h1 class="text-lg font-semibold tracking-wide text-blue-600 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Lat Long link generator
+            </h1>
+            <span class="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-full font-medium">Offline Ready</span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-md w-full mx-auto p-4 flex-grow flex flex-col justify-center">
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xl shadow-slate-100 space-y-5">
+            
+            <div>
+                <label for="userId" class="block text-sm font-medium text-slate-700 mb-1.5">FTTH User ID</label>
+                <div class="flex rounded-xl shadow-xs ring-1 ring-slate-300 focus-within:ring-2 focus-within:ring-blue-600 bg-white overflow-hidden">
+                    <input type="text" id="userId" placeholder="e.g. fth86123258223_sid" 
+                        class="flex-grow bg-transparent py-3 px-4 text-slate-900 placeholder-slate-400 focus:outline-none text-sm sm:text-base">
+                    <span class="inline-flex items-center px-3 bg-slate-100 text-slate-500 text-xs sm:text-sm border-l border-slate-200 select-none">
+                        @ftth.bsnl.in
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1.5">Enter only the user ID prefix. (If you paste the full ID with domain, it will be automatically cleaned).</p>
+            </div>
+
+            <button onclick="generateLink()" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium py-3 px-4 rounded-xl transition-all shadow-md shadow-blue-600/20 flex items-center justify-center gap-2 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                Generate Link
+            </button>
+
+            <!-- Result Section -->
+            <div id="resultSection" class="hidden space-y-3 pt-3 border-t border-slate-200">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500">Generated URL</label>
+                
+                <div class="relative bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-blue-700 break-all font-mono max-h-28 overflow-y-auto" id="outputUrl">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button onclick="copyToClipboard()" id="copyBtn" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 text-sm font-medium py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                        Copy Link
+                    </button>
+                    
+                    <a id="openLinkBtn" href="#" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-sm font-medium py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        Open Link
+                    </a>
+                </div>
+
+                <!-- Web Share Button -->
+                <button id="shareBtn" onclick="shareLink()" class="hidden w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    Share via WhatsApp / Apps
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-4 text-center text-xs text-slate-400 space-y-1">
+        <div>BSNL Field Utility Tool &bull; Works fully offline</div>
+        <div class="text-[10px] text-slate-300">JTO OP Medarametla</div>
+    </footer>
+
+    <!-- Script Logic -->
+    <script>
+        let finalGeneratedUrl = "";
+
+        function generateLink() {
+            let rawInput = document.getElementById('userId').value.trim();
+            if (!rawInput) {
+                alert("Please enter a valid FTTH User ID.");
+                return;
+            }
+
+            if (rawInput.includes('@ftth.bsnl.in')) {
+                rawInput = rawInput.split('@')[0];
+                document.getElementById('userId').value = rawInput;
+            }
+
+            const fullUserIdString = rawInput + "@ftth.bsnl.in|M";
+            
+            let encodedVariable = "";
+            try {
+                encodedVariable = btoa(fullUserIdString);
+            } catch (e) {
+                encodedVariable = btoa(encodeURIComponent(fullUserIdString));
+            }
+
+            finalGeneratedUrl = "https://foa.cdr.bsnl.co.in/wfm/accountDetailsConfirmation/index.html?BB_USER_ID=" + encodedVariable + "&REDIRECT=M";
+
+            document.getElementById('outputUrl').innerText = finalGeneratedUrl;
+            document.getElementById('openLinkBtn').href = finalGeneratedUrl;
+            document.getElementById('resultSection').classList.remove('hidden');
+
+            if (navigator.share) {
+                document.getElementById('shareBtn').classList.remove('hidden');
+            }
+        }
+
+        function copyToClipboard() {
+            if (!finalGeneratedUrl) return;
+            navigator.clipboard.writeText(finalGeneratedUrl).then(() => {
+                const copyBtn = document.getElementById('copyBtn');
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Copied!`;
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                }, 2000);
+            }).catch(err => {
+                alert("Failed to copy text.");
+            });
+        }
+
+        function shareLink() {
+            if (!finalGeneratedUrl) return;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Lat Long Link',
+                    text: 'Please open this link to capture location coordinates:',
+                    url: finalGeneratedUrl,
+                }).catch(console.error);
+            }
+        }
+
+        document.getElementById('userId').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                generateLink();
+            }
+        });
+    </script>
+</body>
+</html>
